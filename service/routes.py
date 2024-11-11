@@ -68,7 +68,27 @@ def create_accounts():
 # READ AN ACCOUNT
 ######################################################################
 
-# ... place you code here to READ an account ...
+# Create a Flask route that responds to the GET method for the endpoint /accounts/<id>.
+@app.route("/accounts/<id>", methods=["GET"])
+# Create a function called read_account(id) to hold the implementation.
+def read_account(id):
+    """
+    Reads an Account
+    This endpoint will read an Account based on its ID
+    """
+
+    # Call the Account.find(), which will return an account by id.
+    account = Account.find(id)
+
+    # Abort with a return code HTTP_404_NOT_FOUND if the account was not found.
+    if not account:
+        abort(status.HTTP_404_NOT_FOUND, f"Account with id '{id}' was not found.")
+
+    # Call the serialize() method on an account to serialize it to a Python dictionary.
+    account_dict = account.serialize()
+
+    # Send the serialized data and a return code of HTTP_200_OK back to the caller.
+    return account_dict, status.HTTP_200_OK
 
 
 ######################################################################
