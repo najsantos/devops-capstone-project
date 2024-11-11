@@ -69,7 +69,7 @@ def create_accounts():
 ######################################################################
 
 # Create a Flask route that responds to the GET method for the endpoint /accounts/<id>.
-@app.route("/accounts/<id>", methods=["GET"])
+@app.route("/accounts/<int:id>", methods=["GET"])
 # Create a function called read_account(id) to hold the implementation.
 def read_account(id):
     """
@@ -95,7 +95,28 @@ def read_account(id):
 # UPDATE AN EXISTING ACCOUNT
 ######################################################################
 
-# ... place you code here to UPDATE an account ...
+@app.route("/accounts/<int:id>", methods=["PUT"])
+def update_products(id):
+    """
+    Update an Account
+    This endpoint will update an Account based on the body that is posted
+    """
+
+    # Check request is provided in JSON format
+    check_content_type("application/json")
+
+    # Call the Account.find(), which will return an account by id.
+    account = Account.find(id)
+    if not account:
+        abort(status.HTTP_404_NOT_FOUND, f"Account with id '{id}' was not found.")
+
+    # Retrive request content and update account accordingly
+    account.deserialize(request.get_json())
+    account.id = id
+    account.update()
+
+    # Send the serialized data and a return code of HTTP_200_OK back to the caller.
+    return account.serialize(), status.HTTP_200_OK
 
 
 ######################################################################

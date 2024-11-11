@@ -70,6 +70,13 @@ class TestAccountService(TestCase):
             accounts.append(account)
         return accounts
 
+    def get_account_count(self):
+        """Count the current number of accounts"""
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        return len(data)
+
     ######################################################################
     #  A C C O U N T   T E S T   C A S E S
     ######################################################################
@@ -152,11 +159,47 @@ class TestAccountService(TestCase):
         self.assertEqual(new_account["phone_number"], account.phone_number)
         self.assertEqual(new_account["date_joined"], str(account.date_joined))
 
-    def test_account_not_found(self):
-        """It should return account not found"""
+    def test_read_account_not_found(self):
+        """Attempt to read non-existing account, should return account not found"""
 
         # Make a self.client.get() call to /accounts/{id} passing in an invalid account id 0
         response = self.client.get(f"{BASE_URL}/0")
+
+        # Assert that the return code was HTTP_404_NOT_FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_account(self):
+        """It should Update an existing Account"""
+
+        # Make a self.client.post() call to accounts to create a new account, passing in some account data.
+        account = AccountFactory()
+        response = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Update the account with different data
+        new_account = response.get_json()
+        new_account["name"] = "John Doe"
+
+        # Make a self.client.put() call to /accounts/{id} passing in that account id.
+        response = self.client.put(f"{BASE_URL}/{new_account['id']}", json=new_account)
+        
+        # Assert that the return code was HTTP_200_OK, to verify that the request was successful.
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check the json that was returned and assert that it is equal to the data that you sent.
+        updated_account = response.get_json()
+        self.assertEqual(updated_account["name"], "John Doe")
+
+    def test_update_account_not_found(self):
+        """Attempt to update non-existing account, should return not found"""
+
+        # Make a self.client.put() call to /accounts/{id} passing in an invalid account id 0
+        account = AccountFactory()
+        response = self.client.put(f"{BASE_URL}/0", json=account.serialize())
 
         # Assert that the return code was HTTP_404_NOT_FOUND
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
