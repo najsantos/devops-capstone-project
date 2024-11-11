@@ -61,7 +61,18 @@ def create_accounts():
 # LIST ALL ACCOUNTS
 ######################################################################
 
-# ... place you code here to LIST accounts ...
+@app.route("/accounts", methods=["GET"])
+def list_accounts():
+    """Returns a list of Accounts"""
+
+    # Retrive all accounts from database
+    accounts = Account.all()
+
+    # Serialise accounts into JSON format
+    results = jsonify([account.serialize() for account in accounts])
+
+    # Send the serialized data and a return code of HTTP_200_OK back to the caller
+    return results, status.HTTP_200_OK
 
 
 ######################################################################
@@ -96,7 +107,7 @@ def read_account(id):
 ######################################################################
 
 @app.route("/accounts/<int:id>", methods=["PUT"])
-def update_products(id):
+def update_account(id):
     """
     Update an Account
     This endpoint will update an Account based on the body that is posted
