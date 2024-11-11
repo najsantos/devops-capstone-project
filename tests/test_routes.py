@@ -219,3 +219,25 @@ class TestAccountService(TestCase):
         # Check five accounts were returned
         data = response.get_json()
         self.assertEqual(len(data), 5)
+
+    def test_delete_account(self):
+        """It should Delete an Account"""
+
+        # Create five accounts with Account Factory
+        accounts = self._create_accounts(5)
+        account_count = self.get_account_count()
+        self.assertEqual(account_count, 5)
+
+        # Delete one of the accounts
+        test_account = accounts[0]
+        response = self.client.delete(f"{BASE_URL}/{test_account.id}")
+
+        # Assert that the return code was HTTP_204_NO_CONTENT and no data was sent.
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
+
+        # Attempt to read account to verify deletion
+        response = self.client.get(f"{BASE_URL}/{test_account.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        new_count = self.get_account_count()
+        self.assertEqual(new_count, account_count - 1)
