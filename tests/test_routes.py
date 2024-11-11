@@ -123,4 +123,40 @@ class TestAccountService(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    # ADD YOUR TEST CASES HERE ...
+    def test_read_an_account(self):
+        """It should Read an Account"""
+
+        # Make a self.client.post() call to accounts to create a new account, passing in some account data.
+        account = AccountFactory()
+        response = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Get back the account id that was generated from the json.
+        account.id = response.get_json()["id"]
+
+        # Make a self.client.get() call to /accounts/{id} passing in that account id.
+        response = self.client.get(f"{BASE_URL}/{account.id}")
+
+        # Assert that the return code was HTTP_200_OK, to verify that the request was successful.
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check the json that was returned and assert that it is equal to the data that you sent.
+        new_account = response.get_json()
+        self.assertEqual(new_account["name"], account.name)
+        self.assertEqual(new_account["email"], account.email)
+        self.assertEqual(new_account["address"], account.address)
+        self.assertEqual(new_account["phone_number"], account.phone_number)
+        self.assertEqual(new_account["date_joined"], str(account.date_joined))
+
+    def test_account_not_found(self):
+        """It should return account not found"""
+
+        # Make a self.client.get() call to /accounts/{id} passing in an invalid account id 0
+        response = self.client.get(f"{BASE_URL}/0")
+
+        # Assert that the return code was HTTP_404_NOT_FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
