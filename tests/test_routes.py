@@ -186,7 +186,7 @@ class TestAccountService(TestCase):
 
         # Make a self.client.put() call to /accounts/{id} passing in that account id.
         response = self.client.put(f"{BASE_URL}/{new_account['id']}", json=new_account)
-        
+
         # Assert that the return code was HTTP_200_OK, to verify that the request was successful.
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -208,7 +208,7 @@ class TestAccountService(TestCase):
         """It should Get the list of Accounts"""
 
         # Create five accounts with Account Factory
-        accounts = self._create_accounts(5)
+        self._create_accounts(5)
 
         # Make a self.client.get() call to /accounts to read all accounts
         response = self.client.get(BASE_URL)
